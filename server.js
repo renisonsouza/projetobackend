@@ -8,7 +8,6 @@ app.get('/', (req, res) => {
   res.send('Hello, World!');
 });
 
-
 app.listen(PORT, () => {
   console.log(`Rodando na porta ${PORT}`);
 });
