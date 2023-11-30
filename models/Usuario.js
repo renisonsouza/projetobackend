@@ -1,4 +1,4 @@
-const { DataTypes, Op } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../banco/bd");
 
 const UsuarioModel = sequelize.define('Usuario', {
@@ -16,11 +16,7 @@ const UsuarioModel = sequelize.define('Usuario', {
         allowNull: false,
         unique: true
     },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
+
     senha: {
         type: DataTypes.STRING,
         allowNull: false
@@ -37,22 +33,20 @@ module.exports = {
         return usuarios;
     },
 
-    save: async function (nome, usuario, email, senha) {
+    save: async function (nome, usuario, senha) {
         const usuarioCriado = await UsuarioModel.create({
             nome,
             usuario,
-            email,
             senha
         });
 
         return usuarioCriado;
     },
 
-    update: async function (id, nome, usuario, email, senha, isAdmin) {
+    update: async function (id, nome, usuario, senha, isAdmin) {
         await UsuarioModel.update({
             nome,
             usuario,
-            email,
             senha,
             isAdmin
         }, {
@@ -68,10 +62,6 @@ module.exports = {
 
     getById: async function (id) {
         return await UsuarioModel.findByPk(id);
-    },
-
-    getByEmail: async function (email) {
-        return await UsuarioModel.findOne({ where: { email } });
     },
 
     Model: UsuarioModel
