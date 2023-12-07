@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const sequelize = require("../banco/bd");
+const sequelize = require("../helpers/bd");
 
 const VinhoModel = require('../models/vinho');
 const UsuarioModel = require('../models/usuario');

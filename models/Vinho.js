@@ -1,5 +1,5 @@
 const { DataTypes, Op } = require("sequelize");
-const sequelize = require("../banco/bd");
+const sequelize = require("../helpers/bd");
 
 const VinhoModel = sequelize.define('Vinho', {
     codigo: {
@@ -13,7 +13,12 @@ const VinhoModel = sequelize.define('Vinho', {
     },
     ano: {
         type: DataTypes.INTEGER,
-        allowNull: true
+        allowNull: true,
+        validate: {
+            isInt: true,
+            min: 1900,
+            max: new Date().getFullYear()
+        }
     },
     produtor: {
         type: DataTypes.STRING,
@@ -22,22 +27,52 @@ const VinhoModel = sequelize.define('Vinho', {
 });
 
 module.exports = {
-    list: async function () {
-        const vinhos = await VinhoModel.findAll();
+    
+    list: async function (limite = 10, pagina = 1) {
+        const offset = (pagina - 1) * limite;
+        const vinhos = await VinhoModel.findAll({
+            limit: limite,
+            offset: offset
+        });
         return vinhos;
     },
 
-    save: async function (nome, ano, produtor) {
+    save: async function (nome, ano, produtor, usuarioId) {
+        if (!usuarioId) {
+            throw new Error("Usuário não autenticado.");
+        }
+
+        if (!nome || nome.trim() === '') {
+            throw new Error("Nome do vinho é obrigatório.");
+        }
+
+
         const vinho = await VinhoModel.create({
             nome,
             ano,
-            produtor
+            produtor,
+            UsuarioId: usuarioId
         });
 
         return vinho;
     },
 
-    update: async function (id, nome, ano, produtor) {
+    update: async function (id, nome, ano, produtor, usuarioId) {
+        if (!usuarioId) {
+            throw new Error("Usuário não autenticado.");
+        }
+
+        const vinhoExistente = await VinhoModel.findByPk(id);
+
+        if (!vinhoExistente) {
+            throw new Error("Vinho não encontrado.");
+        }
+
+        if (vinhoExistente.UsuarioId !== usuarioId) {
+            throw new Error("Você não tem permissão para editar este vinho.");
+        }
+
+
         await VinhoModel.update({
             nome,
             ano,
@@ -49,7 +84,21 @@ module.exports = {
         return await VinhoModel.findByPk(id);
     },
 
-    delete: async function (id) {
+    delete: async function (id, usuarioId) {
+        if (!usuarioId) {
+            throw new Error("Usuário não autenticado.");
+        }
+
+        const vinhoExistente = await VinhoModel.findByPk(id);
+
+        if (!vinhoExistente) {
+            throw new Error("Vinho não encontrado.");
+        }
+
+        if (vinhoExistente.UsuarioId !== usuarioId) {
+            throw new Error("Você não tem permissão para excluir este vinho.");
+        }
+
         return await VinhoModel.destroy({ where: { codigo: id } });
     },
 

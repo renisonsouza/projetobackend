@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../banco/bd");
+const sequelize = require("../helpers/bd");
 
 const UsuarioModel = sequelize.define('Usuario', {
     id: {
@@ -16,7 +16,6 @@ const UsuarioModel = sequelize.define('Usuario', {
         allowNull: false,
         unique: true
     },
-
     senha: {
         type: DataTypes.STRING,
         allowNull: false
@@ -26,6 +25,29 @@ const UsuarioModel = sequelize.define('Usuario', {
         defaultValue: false
     }
 });
+
+const bcrypt = require("bcrypt");
+
+UsuarioModel.autenticar = async function (usuario, senha) {
+    const usuarioAutenticado = await this.findOne({
+        where: {
+            usuario,
+        }
+    });
+
+    if (!usuarioAutenticado) {
+        return null; 
+    }
+
+    const senhaCorreta = await bcrypt.compare(senha, usuarioAutenticado.senha);
+
+    if (senhaCorreta) {
+        return usuarioAutenticado;
+    } else {
+        return null;
+    }
+};
+
 
 module.exports = {
     list: async function () {
@@ -64,5 +86,10 @@ module.exports = {
         return await UsuarioModel.findByPk(id);
     },
 
+    getByUsuario: async function (usuario) {
+        return await UsuarioModel.findOne({ where: { usuario } });
+    },
+
+    autenticar: UsuarioModel.auth,
     Model: UsuarioModel
 };
