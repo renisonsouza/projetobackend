@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../helpers/bd");
+const bcrypt = require("bcrypt");
 
 const UsuarioModel = sequelize.define('Usuario', {
     id: {
@@ -26,8 +27,6 @@ const UsuarioModel = sequelize.define('Usuario', {
     }
 });
 
-const bcrypt = require("bcrypt");
-
 UsuarioModel.autenticar = async function (usuario, senha) {
     const usuarioAutenticado = await this.findOne({
         where: {
@@ -48,30 +47,25 @@ UsuarioModel.autenticar = async function (usuario, senha) {
     }
 };
 
-
 module.exports = {
     list: async function () {
         const usuarios = await UsuarioModel.findAll();
         return usuarios;
     },
 
-    save: async function (nome, usuario, senha) {
+    save: async function (nome, usuario, senha, isAdmin = false) {
         const usuarioCriado = await UsuarioModel.create({
             nome,
             usuario,
-            senha
+            senha,
+            isAdmin
         });
 
         return usuarioCriado;
     },
 
-    update: async function (id, nome, usuario, senha, isAdmin) {
-        await UsuarioModel.update({
-            nome,
-            usuario,
-            senha,
-            isAdmin
-        }, {
+    update: async function (id, obj) {
+        await UsuarioModel.update(obj, {
             where: { id }
         });
 
@@ -90,6 +84,6 @@ module.exports = {
         return await UsuarioModel.findOne({ where: { usuario } });
     },
 
-    autenticar: UsuarioModel.auth,
+    autenticar: UsuarioModel.autenticar,
     Model: UsuarioModel
 };

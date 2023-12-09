@@ -16,7 +16,7 @@ const VinhoModel = sequelize.define('Vinho', {
         allowNull: true,
         validate: {
             isInt: true,
-            min: 1900,
+            min: 1800,
             max: new Date().getFullYear()
         }
     },
@@ -27,31 +27,29 @@ const VinhoModel = sequelize.define('Vinho', {
 });
 
 module.exports = {
-    
     list: async function (limite = 10, pagina = 1) {
+        if (limite !== 10 || pagina < 1) {
+            throw new Error("Parâmetros de paginação inválidos.");
+        }
+
         const offset = (pagina - 1) * limite;
-        const vinhos = await VinhoModel.findAll({
+        const vinhos = await VinhoModel.findAndCountAll({
             limit: limite,
             offset: offset
         });
-        return vinhos;
+
+        return {
+            vinhos: vinhos.rows,
+            total: vinhos.count
+        };
     },
 
     save: async function (nome, ano, produtor, usuarioId) {
-        if (!usuarioId) {
-            throw new Error("Usuário não autenticado.");
-        }
-
-        if (!nome || nome.trim() === '') {
-            throw new Error("Nome do vinho é obrigatório.");
-        }
-
-
+       
         const vinho = await VinhoModel.create({
             nome,
             ano,
-            produtor,
-            UsuarioId: usuarioId
+            produtor
         });
 
         return vinho;
@@ -67,11 +65,6 @@ module.exports = {
         if (!vinhoExistente) {
             throw new Error("Vinho não encontrado.");
         }
-
-        if (vinhoExistente.UsuarioId !== usuarioId) {
-            throw new Error("Você não tem permissão para editar este vinho.");
-        }
-
 
         await VinhoModel.update({
             nome,
@@ -95,11 +88,9 @@ module.exports = {
             throw new Error("Vinho não encontrado.");
         }
 
-        if (vinhoExistente.UsuarioId !== usuarioId) {
-            throw new Error("Você não tem permissão para excluir este vinho.");
-        }
+        await VinhoModel.destroy({ where: { codigo: id } });
 
-        return await VinhoModel.destroy({ where: { codigo: id } });
+        return { mensagem: "Vinho excluído com sucesso." };
     },
 
     getById: async function (id) {

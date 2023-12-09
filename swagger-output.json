@@ -1,0 +1,900 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Adega de Vinhos",
+    "version": "1.0.0",
+    "description": "API para gerenciamento de vinhos em adega"
+  },
+  "paths": {
+    "/install": {
+      "get": {
+        "summary": "Insere informaçoes iniciais no Banco de Dados.",
+        "description": "Rota para obter uma lista de produtores, vinhos e usuários.",
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna produtores, vinhos e usuários.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "description": "Indica se a requisição foi bem-sucedida."
+                    },
+                    "produtores": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "codigo": {
+                            "type": "integer",
+                            "description": "Código do produtor de vinho."
+                          },
+                          "nome": {
+                            "type": "string",
+                            "description": "Nome do produtor de vinho."
+                          }
+                        },
+                        "required": [
+                          "codigo",
+                          "nome"
+                        ]
+                      },
+                      "description": "Lista de produtores de vinho."
+                    },
+                    "vinhos": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nome": {
+                            "type": "string",
+                            "description": "Nome do vinho."
+                          },
+                          "ano": {
+                            "type": "integer",
+                            "description": "Ano de produção do vinho."
+                          },
+                          "produtorCodigo": {
+                            "type": "integer",
+                            "description": "Código do produtor do vinho."
+                          }
+                        },
+                        "required": [
+                          "nome",
+                          "ano",
+                          "produtorCodigo"
+                        ]
+                      },
+                      "description": "Lista de vinhos."
+                    },
+                    "usuarios": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "nome": {
+                            "type": "string",
+                            "description": "Nome do usuário."
+                          },
+                          "username": {
+                            "type": "string",
+                            "description": "Nome de usuário."
+                          },
+                          "senha": {
+                            "type": "string",
+                            "description": "Senha do usuário."
+                          },
+                          "admin": {
+                            "type": "boolean",
+                            "description": "Indica se o usuário é um administrador."
+                          }
+                        },
+                        "required": [
+                          "nome",
+                          "username"
+                        ]
+                      },
+                      "description": "Lista de usuários."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usuarios/cadastro": {
+      "post": {
+        "summary": "Cadastra um novo usuário.",
+        "description": "Rota para cadastrar um novo usuário na aplicação.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo informações do novo usuário.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Nome do usuário."
+                },
+                "usuario": {
+                  "type": "string",
+                  "description": "Nome de usuário."
+                },
+                "senha": {
+                  "type": "string",
+                  "description": "Senha do usuário."
+                }
+              },
+              "required": [
+                "nome",
+                "usuario",
+                "senha"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário cadastrado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do usuário cadastrado."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Nome do usuário."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Nome de usuário."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Usuário já existe."
+          }
+        }
+      }
+    },
+    "/usuarios/login": {
+      "post": {
+        "summary": "Realiza login de usuário.",
+        "description": "Rota para autenticar um usuário e gerar token de acesso.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo credenciais de login.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "usuario": {
+                  "type": "string",
+                  "description": "Nome de usuário."
+                },
+                "senha": {
+                  "type": "string",
+                  "description": "Senha do usuário."
+                }
+              },
+              "required": [
+                "usuario",
+                "senha"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login bem-sucedido. Retorna token de acesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "description": "Token de acesso."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas."
+          },
+          "500": {
+            "description": "Falha ao realizar o login."
+          }
+        }
+      }
+    },
+    "/usuarios/lista-usuario": {
+      "get": {
+        "summary": "Retorna a lista de usuários.",
+        "description": "Rota para obter a lista de todos os usuários.",
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna a lista de usuários.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer",
+                        "description": "ID do usuário."
+                      },
+                      "nome": {
+                        "type": "string",
+                        "description": "Nome do usuário."
+                      },
+                      "usuario": {
+                        "type": "string",
+                        "description": "Nome de usuário."
+                      },
+                      "isAdmin": {
+                        "type": "boolean",
+                        "description": "Indica se o usuário é um administrador."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar os usuários."
+          }
+        }
+      }
+    },
+    "/usuarios/{id}": {
+      "get": {
+        "summary": "Retorna um usuário específico.",
+        "description": "Rota para obter informações de um usuário específico.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do usuário.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna informações do usuário.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do usuário."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Nome do usuário."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Nome de usuário."
+                    },
+                    "isAdmin": {
+                      "type": "boolean",
+                      "description": "Indica se o usuário é um administrador."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado."
+          },
+          "500": {
+            "description": "Erro ao obter informações do usuário."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Exclui um usuário.",
+        "description": "Rota para excluir um usuário existente.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do usuário a ser excluído.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário excluído com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do usuário excluído."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Nome do usuário excluído."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Nome de usuário excluído."
+                    },
+                    "isAdmin": {
+                      "type": "boolean",
+                      "description": "Indica se o usuário excluído era um administrador."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Apenas administradores podem excluir usuários."
+          },
+          "404": {
+            "description": "Usuário não encontrado."
+          },
+          "500": {
+            "description": "Falha ao excluir o usuário."
+          }
+        }
+      },
+      "put": {
+        "summary": "Atualiza informações de um usuário.",
+        "description": "Rota para atualizar informações de um usuário existente.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "description": "ID do usuário a ser atualizado.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo as informações a serem atualizadas.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Novo nome do usuário."
+                },
+                "usuario": {
+                  "type": "string",
+                  "description": "Novo nome de usuário."
+                },
+                "senha": {
+                  "type": "string",
+                  "description": "Nova senha do usuário."
+                },
+                "isAdmin": {
+                  "type": "boolean",
+                  "description": "Indica se o usuário deve se tornar administrador."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Informações do usuário atualizadas com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do usuário atualizado."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Novo nome do usuário."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Novo nome de usuário."
+                    },
+                    "isAdmin": {
+                      "type": "boolean",
+                      "description": "Indica se o usuário é um administrador."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Nenhuma informação fornecida para atualização."
+          },
+          "404": {
+            "description": "Usuário não encontrado."
+          },
+          "500": {
+            "description": "Falha ao atualizar o usuário."
+          }
+        }
+      }
+    },
+    "/usuarios/alterar-dados": {
+      "post": {
+        "summary": "Altera os dados de um usuário.",
+        "description": "Rota para alterar o nome e/ou a senha de um usuário.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo informações para alteração.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Novo nome do usuário."
+                },
+                "senha": {
+                  "type": "string",
+                  "description": "Nova senha do usuário."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário alterados com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do usuário."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Novo nome do usuário."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Nome de usuário."
+                    },
+                    "isAdmin": {
+                      "type": "boolean",
+                      "description": "Indica se o usuário é um administrador."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado."
+          },
+          "500": {
+            "description": "Falha ao alterar os dados do usuário."
+          }
+        }
+      }
+    },
+    "/usuarios/criar-admin": {
+      "post": {
+        "summary": "Cria um novo administrador.",
+        "description": "Rota para criar um novo usuário com privilégios de administrador.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo informações do novo administrador.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Nome do administrador."
+                },
+                "usuario": {
+                  "type": "string",
+                  "description": "Nome de usuário."
+                },
+                "senha": {
+                  "type": "string",
+                  "description": "Senha do administrador."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Administrador criado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID do administrador criado."
+                    },
+                    "nome": {
+                      "type": "string",
+                      "description": "Nome do administrador."
+                    },
+                    "usuario": {
+                      "type": "string",
+                      "description": "Nome de usuário do administrador."
+                    },
+                    "isAdmin": {
+                      "type": "boolean",
+                      "description": "Indica que o usuário é um administrador."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Apenas administradores podem criar novos administradores."
+          },
+          "500": {
+            "description": "Falha ao criar novo administrador."
+          }
+        }
+      }
+    },
+    "/vinhos/listar-vinhos": {
+      "get": {
+        "summary": "Lista vinhos paginados.",
+        "description": "Rota para listar vinhos de forma paginada.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Limite de vinhos por página."
+          },
+          {
+            "in": "query",
+            "name": "pagina",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Número da página."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna a lista de vinhos paginados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": "// Defina as propriedades retornadas pelo endpoint"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao listar vinhos."
+          }
+        }
+      }
+    },
+    "/vinhos/buscar-vinho/{id}": {
+      "get": {
+        "summary": "Busca um vinho por ID.",
+        "description": "Rota para obter informações de um vinho por ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID do vinho."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna informações do vinho.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": "// Defina as propriedades retornadas pelo endpoint"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vinho não encontrado."
+          },
+          "500": {
+            "description": "Erro ao buscar o vinho."
+          }
+        }
+      }
+    },
+    "/vinhos/criar-vinho": {
+      "post": {
+        "summary": "Cria um novo vinho.",
+        "description": "Rota para criar um novo vinho.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo informações do novo vinho.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Nome do vinho."
+                },
+                "ano": {
+                  "type": "integer",
+                  "description": "Ano de produção do vinho."
+                },
+                "produtor": {
+                  "type": "string",
+                  "description": "Nome do produtor do vinho."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Vinho criado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": "// Defina as propriedades retornadas pelo endpoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro ao criar o vinho.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Mensagem de erro."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vinhos/atualizar-vinho/{id}": {
+      "put": {
+        "summary": "Atualiza um vinho por ID.",
+        "description": "Rota para atualizar informações de um vinho por ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID do vinho a ser atualizado."
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "description": "Objeto contendo as informações a serem atualizadas.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "description": "Novo nome do vinho."
+                },
+                "ano": {
+                  "type": "integer",
+                  "description": "Novo ano de produção do vinho."
+                },
+                "produtor": {
+                  "type": "string",
+                  "description": "Novo nome do produtor do vinho."
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vinho atualizado com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": "// Defina as propriedades retornadas pelo endpoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro ao atualizar o vinho.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Mensagem de erro."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vinhos/excluir-vinho/{id}": {
+      "delete": {
+        "summary": "Exclui um vinho por ID.",
+        "description": "Rota para excluir um vinho por ID.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "ID do vinho a ser excluído."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vinho excluído com sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": "// Defina as propriedades retornadas pelo endpoint"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Erro ao excluir o vinho.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string",
+                      "description": "Mensagem de erro."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vinhos/filtrar-vinhos": {
+      "get": {
+        "summary": "Filtra vinhos por ano, produtor e nome.",
+        "description": "Rota para filtrar vinhos com base em diferentes critérios.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "ano",
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filtra vinhos pelo ano de produção."
+          },
+          {
+            "in": "query",
+            "name": "produtor",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtra vinhos pelo nome do produtor."
+          },
+          {
+            "in": "query",
+            "name": "nome",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filtra vinhos pelo nome."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso. Retorna a lista de vinhos filtrados.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": "// Defina as propriedades retornadas pelo endpoint"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro ao filtrar vinhos.",
+            "content": {
+              "application/json": null
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {},
+  "tags": []
+}
